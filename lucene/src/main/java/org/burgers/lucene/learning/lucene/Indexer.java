@@ -12,22 +12,26 @@ public class Indexer {
     private File indexDirectory;
     private DocumentFactory documentFactory;
 
-    public int index() throws IOException {
+    public int index(File directoryToIndex) throws IOException {
         IndexWriter writer = prepareWriter();
 
-        File[] textFiles = getTextFilesInInputDirectory();
+        if (directoryToIndex.isDirectory()){
+            File[] textFiles = getTextFilesInInputDirectory(directoryToIndex);
 
-        for (File  file : textFiles) {
-            writer.addDocument(documentFactory.build(file));
+            for (File  file : textFiles) {
+                writer.addDocument(documentFactory.build(file));
+            }
+
+            int result = writer.numDocs();
+            writer.close();
+            return result;
+        } else{
+            throw new RuntimeException("File: " + directoryToIndex.getAbsolutePath() + " is not a directory.");
         }
-
-        int result = writer.numDocs();
-        writer.close();
-        return result;
     }
 
-    private File[] getTextFilesInInputDirectory() {
-        return indexDirectory.listFiles(new FileFilter() {
+    private File[] getTextFilesInInputDirectory(File directory) {
+        return directory.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
                     return pathname.getName().toLowerCase().endsWith(".txt");

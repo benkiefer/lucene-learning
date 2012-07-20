@@ -2,8 +2,6 @@ package org.burgers.lucene.learning.lucene;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -31,33 +30,21 @@ public class IndexAndSearchIntegrationTest {
     @Before
     public void setUp() {
         indexDirectory = indexer.getIndexDirectory();
-        prepareIndexingDirectory();
+        prepareIndexDirectory();
     }
 
     @Test
-    public void indexAndSearch() throws IOException, ParseException {
-        createIndexableFile("fish");
-        createIndexableFile("chips");
-        int result = indexer.index();
-        assertEquals(2, result);
+    public void indexAndSearch() throws Exception {
+        File inputDirectory = new FileUtil().findFileInClassPath("poems");
+        int result = indexer.index(inputDirectory);
+        assertEquals(3, result);
 
-        List<Document> results = searcher.contentSearch("fish");
+        List<Document> results = searcher.contentSearch("Humpty");
         assertTrue(results.size() == 1);
-        assertEquals(results.get(0).get("fileName"), "fish.txt");
+        assertEquals(results.get(0).get("fileName"), "HumptyDumpty.txt");
     }
 
-    private void createIndexableFile(String fileInfo) throws IOException {
-        String fileName = fileInfo + ".txt";
-        File file = new File(indexDirectory, fileName);
-        Writer out = new OutputStreamWriter(new FileOutputStream(file));
-        try {
-            out.write(fileInfo);
-        } finally {
-            out.close();
-        }
-    }
-
-    private void prepareIndexingDirectory() {
+    private void prepareIndexDirectory() {
         if (!indexDirectory.exists()) {
             indexDirectory.mkdir();
         } else {
