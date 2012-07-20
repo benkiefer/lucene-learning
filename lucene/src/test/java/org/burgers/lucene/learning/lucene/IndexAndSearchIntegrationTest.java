@@ -1,5 +1,9 @@
 package org.burgers.lucene.learning.lucene;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,14 +12,19 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.*;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:contexts/ApplicationContext.xml")
-public class IndexerTest {
+public class IndexAndSearchIntegrationTest {
     @Autowired
     private Indexer indexer;
+
+    @Autowired
+    private Searcher searcher;
 
     private File indexDirectory;
 
@@ -26,11 +35,15 @@ public class IndexerTest {
     }
 
     @Test
-    public void index() throws IOException {
-        createIndexableFile("a");
-        createIndexableFile("b");
+    public void indexAndSearch() throws IOException, ParseException {
+        createIndexableFile("fish");
+        createIndexableFile("chips");
         int result = indexer.index();
         assertEquals(2, result);
+
+        List<Document> results = searcher.contentSearch("fish");
+        assertTrue(results.size() == 1);
+        assertEquals(results.get(0).get("fileName"), "fish.txt");
     }
 
     private void createIndexableFile(String fileInfo) throws IOException {
@@ -45,7 +58,6 @@ public class IndexerTest {
     }
 
     private void prepareIndexingDirectory() {
-        System.out.println("indexDirectory = " + indexDirectory.getAbsolutePath());
         if (!indexDirectory.exists()) {
             indexDirectory.mkdir();
         } else {
@@ -56,11 +68,11 @@ public class IndexerTest {
         assertEquals(0, indexDirectory.listFiles().length);
     }
 
-    public Indexer getIndexer() {
-        return indexer;
-    }
-
     public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
+    }
+
+    public void setSearcher(Searcher searcher) {
+        this.searcher = searcher;
     }
 }

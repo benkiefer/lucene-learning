@@ -14,6 +14,13 @@
         <property name="documentFactory" ref="documentFactory"/>
     </bean>
 
+    <bean id="searcher" class="org.burgers.lucene.learning.lucene.Searcher">
+        <property name="indexDirectory" value="${lucene.learning.lucene.index.directory}"/>
+        <property name="queryFactory" ref="queryFactory"/>
+    </bean>
+
+    <bean id="queryFactory" class="org.burgers.lucene.learning.lucene.QueryFactory"/>
+
     <bean id="documentFactory" class="org.burgers.lucene.learning.lucene.DocumentFactory"/>
 
 </beans>

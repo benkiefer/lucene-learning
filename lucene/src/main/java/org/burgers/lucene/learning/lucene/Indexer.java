@@ -35,7 +35,6 @@ public class Indexer {
             });
     }
 
-
     private IndexWriter prepareWriter() throws IOException {
         Directory directory = FSDirectory.open(indexDirectory);
         return new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_36), true, IndexWriter.MaxFieldLength.UNLIMITED);
